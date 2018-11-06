@@ -10,7 +10,7 @@ This GNN is proposed in our paper "[Compound-protein Interaction Prediction with
 - If you prepare data with the same format as provided in the dataset directory, your can learn our model with your data by the two commands (see "Training of our neural network using your molecular property dataset").
 
 
-# Our GNN model
+## Our GNN model
 
 The basic idea of a GNN can be described as follows:
 
