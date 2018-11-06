@@ -7,7 +7,7 @@ This GNN is proposed in our paper "[Compound-protein Interaction Prediction with
 ## Characteristics
 
 - This code is easy to use. After setting the environment (e.g., PyTorch), preprocessing data and learning a model can be done by only two commands (see "Usage").
-- If you prepare data with the same format as provided in the dataset directory, your can learn our model with your data by the two commands (see "Training of our neural network using your molecular property dataset").
+- If you prepare dataset with the same format as provided in the dataset directory, you can learn our model with your dataset by the two commands (see "Training of our neural network using your molecular property dataset").
 
 
 ## Our GNN model
@@ -29,7 +29,7 @@ Our GNN, based on the r-radius subgraphs (or fingerprints), can be described as 
 <p><img src="our_GNN.jpeg" width="500" /></p>
 </div>
 
-This leads to the learning representations for fingerprints in molecules.
+This leads to the representation learning for r-radius subgraphs (or fingerprints) in molecules.
 
 
 ## Requirements
@@ -59,7 +59,7 @@ bash run_training.sh
 
 The training result and trained model are saved in the output directory (after training, see output/result and output/model).
 
-(iii) You can change the hyperparameters in preprocess_data.sh (e.g., radius) and run_training.sh (e.g., dimensionality, batch size, the number of layers, and learning rate), and try to learn various models!
+(iii) You can change the hyperparameters in preprocess_data.sh and run_training.sh. Try to learn various models!
 
 
 ## Training of our neural network using your molecular property dataset
