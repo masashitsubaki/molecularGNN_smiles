@@ -21,7 +21,7 @@ The basic idea of a GNN can be described as follows:
 The GNN updates the randomly initialized atom vectors in a molecule,
 obtains the molecular vector, and then learns the parameters of the neural networks
 including the atom vectors via backpropagation to predict molecular properties
-(i.e., this is the end-to-end learning of GNN).
+(i.e., this is an end-to-end learning without input features or descriptors in chemoinformatics).
 
 Our GNN, based on the r-radius subgraphs (or fingerprints), can be described as follows:
 
