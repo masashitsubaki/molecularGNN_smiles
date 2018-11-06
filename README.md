@@ -1,30 +1,35 @@
-# GNN_molecules
+# Graph neural network (GNN) for molecules
 
-This is a code for molecular property prediction (MPP) using a graph neural network (GNN) based on r-radius subgraph (or called fingerprint) embeddings. This GNN is proposed in our paper "[Compound-protein Interaction Prediction with End-to-end Learning of Neural Networks for Graphs and Sequences (Bioinformatics, 2018)](https://academic.oup.com/bioinformatics/advance-article-abstract/doi/10.1093/bioinformatics/bty535/5050020?redirectedFrom=PDF)," which aims to predict compound-protein interactions. In this implementation, we provide our GNN to predict various molecular properties such as drug efficacy and photovoltaic efficiency.
+This is a code of a graph neural network (GNN) for molecules, which is based on learning representations of r-radius subgraphs (or called fingerprints) in molecules.
+This GNN is proposed in our paper "[Compound-protein Interaction Prediction with End-to-end Learning of Neural Networks for Graphs and Sequences (Bioinformatics, 2018)](https://academic.oup.com/bioinformatics/advance-article-abstract/doi/10.1093/bioinformatics/bty535/5050020?redirectedFrom=PDF)," which aims to predict compound-protein interactions for drug discovery. In this implementation, using the proposed GNN we provide a model for predicting various molecular properties such as drug efficacy (HIV???) and photovoltaic efficiency.
 
-The basic idea of a GNN is as follows:
+
+## Characteristics
+
+- This code is easy to use. After setting the environment (e.g., PyTorch), preprocessing data and learning a model can be done by only two commands (see "Usage").
+- If you prepare data with the same format as provided in the dataset directory, your can learn our model with your data by the two commands (see "Training of our neural network using your molecular property dataset").
+
+
+# Our GNN model
+
+The basic idea of a GNN can be described as follows:
 
 <div align="center">
 <p><img src="basic_GNN.jpeg" width="500" /></p>
 </div>
 
-Our GNN is based on the r-radius (or fingerprint) embeddings as follows:
+The GNN updates the randomly initialized atom vectors in a molecule,
+obtains the molecular vector, and then learns the parameters of the neural networks
+including the atom vectors via backpropagation to predict molecular properties
+(i.e., this is the end-to-end learning of GNN).
+
+Our GNN, based on the r-radius subgraphs (or fingerprints), can be described as follows:
 
 <div align="center">
 <p><img src="our_GNN.jpeg" width="500" /></p>
 </div>
 
-
-## How to cite
-
-```
-@article{tsubaki2018compound,
-  title={Compound-protein Interaction Prediction with End-to-end Learning of Neural Networks for Graphs and Sequences},
-  author={Tsubaki, Masashi and Tomii, Kentaro and Sese, Jun},
-  journal={Bioinformatics},
-  year={2018}
-}
-```
+This leads to the learning representations for fingerprints in molecules.
 
 
 ## Requirements
@@ -62,3 +67,15 @@ In this repository, we provide a dataset of classification (see dataset/classifi
 and regression (see dataset/regression/photovoltaic).
 If you prepare dataset with the same format as "smiles_property.txt" in a new directory,
 you can train our neural network using your dataset by the above two commands (i) and (ii).
+
+
+## How to cite
+
+```
+@article{tsubaki2018compound,
+  title={Compound-protein Interaction Prediction with End-to-end Learning of Neural Networks for Graphs and Sequences},
+  author={Tsubaki, Masashi and Tomii, Kentaro and Sese, Jun},
+  journal={Bioinformatics},
+  year={2018}
+}
+```
