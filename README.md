@@ -7,7 +7,7 @@ This GNN is proposed in our paper "[Compound-protein Interaction Prediction with
 ## Characteristics
 
 - This code is easy to use. After setting the environment (e.g., PyTorch), preprocessing data and learning a model can be done by only two commands (see "Usage").
-- If you prepare dataset with the same format as provided in the dataset directory, you can learn our model with your dataset by the two commands (see "Training of our neural network using your molecular property dataset").
+- If you prepare a dataset with the same format as provided in the dataset directory, you can learn our model with your dataset by the two commands (see "Training of our neural network using your molecular property dataset").
 
 
 ## Our GNN model
@@ -29,8 +29,9 @@ Our GNN, based on the r-radius subgraphs (or fingerprints), can be described as 
 <p><img src="our_GNN.jpeg" width="500" /></p>
 </div>
 
-Thus, instead of considering random vectors for atoms, we extract r-radius subgraphs from a molecule
-and initialize them using random vectors. This leads to the representation learning for r-radius subgraphs in molecules.
+Thus, instead of using atom vectors, we extract r-radius subgraphs from a molecule,
+initialize them using random vectors, and then learn the representations.
+This leads to the representation learning for r-radius subgraphs in molecules.
 
 
 ## Requirements
@@ -45,7 +46,7 @@ and initialize them using random vectors. This leads to the representation learn
 We provide two major scripts:
 
 - code/classification or regression/preprocess_data.py creates the input tensor data of molecules for processing with PyTorch from the original data (see dataset/classification or regression/original/smiles_property.txt).
-- code/classification or regression/run_training.py trains our neural network using the above preprocessed to predict molecular properties.
+- code/classification or regression/run_training.py trains our neural network using the above preprocessed data to predict molecular properties.
 
 (i) Create the tensor data of molecules and their properties with the following command:
 ```
@@ -66,7 +67,7 @@ The training result and trained model are saved in the output directory (after t
 ## Training of our neural network using your molecular property dataset
 In this repository, we provide a dataset of classification (see dataset/classification/HIV)
 and regression (see dataset/regression/photovoltaic).
-If you prepare dataset with the same format as "smiles_property.txt" in a new directory,
+If you prepare a dataset with the same format as "smiles_property.txt" in a new directory,
 you can train our neural network using your dataset by the above two commands (i) and (ii).
 
 
