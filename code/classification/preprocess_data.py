@@ -13,11 +13,6 @@ def create_atoms(mol):
     return np.array(atoms)
 
 
-def create_adjacency(mol):
-    adjacency = Chem.GetAdjacencyMatrix(mol)
-    return np.array(adjacency)
-
-
 def create_ijbonddict(mol):
     i_jbond_dict = defaultdict(lambda: [])
     for b in mol.GetBonds():
@@ -33,7 +28,7 @@ def create_fingerprints(atoms, i_jbond_dict, radius):
     from a molecular graph using WeisfeilerLehman-like algorithm."""
 
     if (len(atoms) == 1) or (radius == 0):
-        return np.array(atoms)
+        fingerprints = [fingerprint_dict[a] for a in atoms]
 
     else:
         vertices = atoms
@@ -44,10 +39,16 @@ def create_fingerprints(atoms, i_jbond_dict, radius):
                 fingerprint = (vertices[i], tuple(sorted(neighbors)))
                 fingerprints.append(fingerprint_dict[fingerprint])
             vertices = fingerprints
-        return np.array(fingerprints)
+
+    return np.array(fingerprints)
 
 
-def pickle_dump(dictionary, file_name):
+def create_adjacency(mol):
+    adjacency = Chem.GetAdjacencyMatrix(mol)
+    return np.array(adjacency)
+
+
+def dump_dictionary(dictionary, file_name):
     with open(file_name, 'wb') as f:
         pickle.dump(dict(dictionary), f)
 
@@ -93,14 +94,12 @@ if __name__ == "__main__":
 
     dir_input = ('../../dataset/classification/' + DATASET +
                  '/input/radius' + str(radius) + '/')
-    if not os.path.isdir(dir_input):
-        os.mkdir(dir_input)
+    os.makedirs(dir_input, exist_ok=True)
+
     np.save(dir_input + 'molecules', Molecules)
     np.save(dir_input + 'adjacencies', Adjacencies)
     np.save(dir_input + 'properties', Properties)
 
-    if (radius == 0):
-        fingerprint_dict = atom_dict
-    pickle_dump(fingerprint_dict, dir_input + 'fingerprint_dict' + '.pickle')
+    dump_dictionary(fingerprint_dict, dir_input + 'fingerprint_dict.pickle')
 
     print('The preprocess has finished!')

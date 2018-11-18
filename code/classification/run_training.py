@@ -98,25 +98,25 @@ class Tester(object):
     def test(self, dataset_test):
 
         N = len(dataset_test)
-        score_list, label_list, ts_list = [], [], []
+        score_list, label_list, t_list = [], [], []
 
         for i in range(0, N, batch):
             data_batch = list(zip(*dataset_test[i:i+batch]))
             scores, labels, ts = self.model(data_batch, train=False)
             score_list = np.append(score_list, scores)
             label_list = np.append(label_list, labels)
-            ts_list = np.append(ts_list, ts)
+            t_list = np.append(t_list, ts)
 
-        auc = roc_auc_score(ts_list, score_list)
-        precision = precision_score(ts_list, label_list)
-        recall = recall_score(ts_list, label_list)
+        auc = roc_auc_score(t_list, score_list)
+        precision = precision_score(t_list, label_list)
+        recall = recall_score(t_list, label_list)
 
         return auc, precision, recall
 
-    def result(self, epoch, time, loss_total, auc_dev,
+    def result(self, epoch, time, loss, auc_dev,
                auc_test, precision, recall, file_result):
         with open(file_result, 'a') as f:
-            result = map(str, [epoch, time, loss_total, auc_dev,
+            result = map(str, [epoch, time, loss, auc_dev,
                                auc_test, precision, recall])
             f.write('\t'.join(result) + '\n')
 
@@ -124,16 +124,16 @@ class Tester(object):
         torch.save(model.state_dict(), file_name)
 
 
-def load_tensor(data, dtype):
-    return [dtype(d).to(device) for d in np.load(dir_input + data + '.npy')]
+def load_tensor(file_name, dtype):
+    return [dtype(d).to(device) for d in np.load(file_name + '.npy')]
 
 
-def load_numpy(data):
-    return np.load(dir_input + data + '.npy')
+def load_numpy(file_name):
+    return np.load(file_name + '.npy')
 
 
-def load_pickle(data):
-    with open(dir_input + data, 'rb') as f:
+def load_pickle(file_name):
+    with open(file_name, 'rb') as f:
         return pickle.load(f)
 
 
@@ -164,11 +164,11 @@ if __name__ == "__main__":
         device = torch.device('cpu')
         print('The code uses CPU!!!')
 
-    dir_input = ('../../dataset/classification/' +
-                 DATASET + '/input/radius' + radius + '/')
-    molecules = load_tensor('molecules', torch.LongTensor)
-    adjacencies = load_numpy('adjacencies')
-    t_properties = load_tensor('properties', torch.LongTensor)
+    dir_input = ('../../dataset/classification/' + DATASET +
+                 '/input/radius' + radius + '/')
+    molecules = load_tensor(dir_input + 'molecules', torch.LongTensor)
+    adjacencies = load_numpy(dir_input + 'adjacencies')
+    t_properties = load_tensor(dir_input + 'properties', torch.LongTensor)
     with open(dir_input + 'fingerprint_dict.pickle', 'rb') as f:
         fingerprint_dict = pickle.load(f)
 
@@ -177,7 +177,7 @@ if __name__ == "__main__":
     dataset_train, dataset_ = split_dataset(dataset, 0.8)
     dataset_dev, dataset_test = split_dataset(dataset_, 0.5)
 
-    fingerprint_dict = load_pickle('fingerprint_dict.pickle')
+    fingerprint_dict = load_pickle(dir_input + 'fingerprint_dict.pickle')
     unknown = 100
     n_fingerprint = len(fingerprint_dict) + unknown
 
@@ -191,7 +191,7 @@ if __name__ == "__main__":
         f.write('Epoch\tTime(sec)\tLoss_train\tAUC_dev\t'
                 'AUC_test\tPrecision_test\tRecall_test\n')
 
-    file_model = '../../output/model/AUC--' + setting
+    file_model = '../../output/model/' + setting
 
     print('Training...')
     print('Epoch Time(sec) Loss_train AUC_dev '
@@ -204,15 +204,15 @@ if __name__ == "__main__":
         if (epoch+1) % decay_interval == 0:
             trainer.optimizer.param_groups[0]['lr'] *= lr_decay
 
-        loss_total = trainer.train(dataset_train)
+        loss = trainer.train(dataset_train)
         auc_dev = tester.test(dataset_dev)[0]
         auc_test, precision, recall = tester.test(dataset_test)
 
         end = timeit.default_timer()
         time = end - start
 
-        tester.result(epoch, time, loss_total, auc_dev,
+        tester.result(epoch, time, loss, auc_dev,
                       auc_test, precision, recall, file_result)
         tester.save_model(model, file_model)
 
-        print(epoch, time, loss_total, auc_dev, auc_test, precision, recall)
+        print(epoch, time, loss, auc_dev, auc_test, precision, recall)

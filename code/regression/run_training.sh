@@ -17,7 +17,7 @@ lr_decay=0.9
 
 decay_interval=50
 
-iteration=1000
+iteration=500
 
 setting=$DATASET--radius$radius--dim$dim--layer$layer--batch$batch--lr$lr--lr_decay$lr_decay--decay_interval$decay_interval
 python run_training.py $DATASET $radius $dim $layer $batch $lr $lr_decay $decay_interval $iteration $setting
