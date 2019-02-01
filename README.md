@@ -4,7 +4,7 @@ This is a code of a graph neural network (GNN) for molecules, which is based on 
 This GNN is proposed in our paper "[Compound-protein Interaction Prediction with End-to-end Learning of Neural Networks for Graphs and Sequences (Bioinformatics, 2018)](https://academic.oup.com/bioinformatics/advance-article-abstract/doi/10.1093/bioinformatics/bty535/5050020?redirectedFrom=PDF)," which aims to predict compound-protein interactions for drug discovery. In this implementation, using the proposed GNN we provide a model for predicting various molecular properties such as drug efficacy and photovoltaic efficiency.
 
 <div align="center">
-<p><img src="overview.jpeg" width="750" /></p>
+<p><img src="overview.jpeg" width="600" /></p>
 </div>
 
 
