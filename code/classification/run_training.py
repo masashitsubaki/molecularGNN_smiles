@@ -12,18 +12,21 @@ import torch.optim as optim
 from sklearn.metrics import roc_auc_score, precision_score, recall_score
 
 
-class MolecularPropertyPrediction(nn.Module):
+class GraphNeuralNetwork(nn.Module):
     def __init__(self):
-        super(MolecularPropertyPrediction, self).__init__()
-        self.embed_atom = nn.Embedding(n_fingerprint, dim)
-        self.W_atom = nn.ModuleList([nn.Linear(dim, dim)
-                                     for _ in range(layer)])
+        super(GraphNeuralNetwork, self).__init__()
+        self.embed_fingerprint = nn.Embedding(n_fingerprint, dim)
+        self.W_fingerprint = nn.ModuleList([nn.Linear(dim, dim)
+                                            for _ in range(hidden_layer)])
+        self.W_output = nn.ModuleList([nn.Linear(dim, dim)
+                                       for _ in range(output_layer)])
         self.W_property = nn.Linear(dim, 2)
 
-    def pad(self, matrices, value):
+    def pad(self, matrices, pad_value):
+        """Pad adjacency matrices for batch processing."""
         sizes = [d.shape[0] for d in matrices]
         D = sum(sizes)
-        pad_matrices = value + np.zeros((D, D))
+        pad_matrices = pad_value + np.zeros((D, D))
         m = 0
         for i, d in enumerate(matrices):
             s_i = sizes[i]
@@ -35,54 +38,75 @@ class MolecularPropertyPrediction(nn.Module):
         y = list(map(lambda x: torch.sum(x, 0), torch.split(xs, axis)))
         return torch.stack(y)
 
-    def update(self, xs, adjacency, i):
-        hs = torch.relu(self.W_atom[i](xs))
-        return xs + torch.matmul(adjacency, hs)
+    def mean_axis(self, xs, axis):
+        y = list(map(lambda x: torch.mean(x, 0), torch.split(xs, axis)))
+        return torch.stack(y)
+
+    def gnn(self, xs, A, M, i):
+        hs = torch.relu(self.W_fingerprint[i](xs))
+        if update == 'sum':
+            return xs + torch.matmul(A, hs)
+        if update == 'mean':
+            return xs + torch.matmul(A, hs) / (M-1)
 
     def forward(self, inputs):
 
-        atoms, adjacency = inputs
-        axis = list(map(lambda x: len(x), atoms))
+        Smiles, fingerprints, adjacencies = inputs
+        axis = list(map(lambda x: len(x), fingerprints))
 
-        atoms = torch.cat(atoms)
-        x_atoms = self.embed_atom(atoms)
-        adjacency = self.pad(adjacency, 0)
+        M = np.concatenate([np.repeat(len(f), len(f)) for f in fingerprints])
+        M = torch.unsqueeze(torch.FloatTensor(M), 1)
 
-        for i in range(layer):
-            x_atoms = self.update(x_atoms, adjacency, i)
+        fingerprints = torch.cat(fingerprints)
+        fingerprint_vectors = self.embed_fingerprint(fingerprints)
+        adjacencies = self.pad(adjacencies, 0)
 
-        y_molecules = self.sum_axis(x_atoms, axis)
-        z_properties = self.W_property(y_molecules)
+        for i in range(hidden_layer):
+            fingerprint_vectors = self.gnn(fingerprint_vectors,
+                                           adjacencies, M, i)
 
-        return z_properties
+        if output == 'sum':
+            molecular_vectors = self.sum_axis(fingerprint_vectors, axis)
+        if output == 'mean':
+            molecular_vectors = self.mean_axis(fingerprint_vectors, axis)
+
+        for j in range(output_layer):
+            molecular_vectors = torch.relu(self.W_output[j](molecular_vectors))
+
+        predicted_properties = self.W_property(molecular_vectors)
+
+        return Smiles, predicted_properties
 
     def __call__(self, data_batch, train=True):
 
-        inputs, t_properties = data_batch[:-1], torch.cat(data_batch[-1])
-        z_properties = self.forward(inputs)
+        inputs = data_batch[:-1]
+        correct_properties = torch.cat(data_batch[-1])
+        Smiles, predicted_properties = self.forward(inputs)
 
         if train:
-            loss = F.cross_entropy(z_properties, t_properties)
+            loss = F.cross_entropy(predicted_properties, correct_properties)
             return loss
         else:
-            zs = F.softmax(z_properties, 1).to('cpu').data.numpy()
-            ts = t_properties.to('cpu').data.numpy()
-            scores = list(map(lambda x: x[1], zs))
-            labels = list(map(lambda x: np.argmax(x), zs))
-            return scores, labels, ts
+            ts = correct_properties.to('cpu').data.numpy()
+            ys = F.softmax(predicted_properties, 1).to('cpu').data.numpy()
+            correct_labels = ts
+            predicted_labels = list(map(lambda x: np.argmax(x), ys))
+            predicted_scores = list(map(lambda x: x[1], ys))
+            return correct_labels, predicted_labels, predicted_scores
 
 
 class Trainer(object):
     def __init__(self, model):
         self.model = model
-        self.optimizer = optim.Adam(self.model.parameters(), lr=lr)
+        self.optimizer = optim.Adam(self.model.parameters(),
+                                    lr=lr, weight_decay=weight_decay)
 
-    def train(self, dataset_train):
-        np.random.shuffle(dataset_train)
-        N = len(dataset_train)
+    def train(self, dataset):
+        np.random.shuffle(dataset)
+        N = len(dataset)
         loss_total = 0
         for i in range(0, N, batch):
-            data_batch = list(zip(*dataset_train[i:i+batch]))
+            data_batch = list(zip(*dataset[i:i+batch]))
             loss = self.model(data_batch)
             self.optimizer.zero_grad()
             loss.backward()
@@ -95,45 +119,52 @@ class Tester(object):
     def __init__(self, model):
         self.model = model
 
-    def test(self, dataset_test):
+    def test(self, dataset):
 
-        N = len(dataset_test)
-        score_list, label_list, t_list = [], [], []
+        N = len(dataset)
+        Correct_labels, Predicted_labels, Predicted_scores = [], [], []
 
         for i in range(0, N, batch):
-            data_batch = list(zip(*dataset_test[i:i+batch]))
-            scores, labels, ts = self.model(data_batch, train=False)
-            score_list = np.append(score_list, scores)
-            label_list = np.append(label_list, labels)
-            t_list = np.append(t_list, ts)
+            data_batch = list(zip(*dataset[i:i+batch]))
 
-        auc = roc_auc_score(t_list, score_list)
-        precision = precision_score(t_list, label_list)
-        recall = recall_score(t_list, label_list)
+            (correct_labels, predicted_labels,
+             predicted_scores) = self.model(data_batch, train=False)
 
-        return auc, precision, recall
+            Correct_labels.append(correct_labels)
+            Predicted_labels.append(predicted_labels)
+            Predicted_scores.append(predicted_scores)
 
-    def result(self, epoch, time, loss, auc_dev,
-               auc_test, precision, recall, file_result):
+        correct_labels = np.concatenate(Correct_labels)
+        predicted_labels = np.concatenate(Predicted_labels)
+        predicted_scores = np.concatenate(Predicted_scores)
+
+        AUC = roc_auc_score(correct_labels, predicted_scores)
+        precision = precision_score(correct_labels, predicted_labels)
+        recall = recall_score(correct_labels, predicted_labels)
+
+        return AUC, precision, recall
+
+    def result_AUC(self, epoch, time, loss_train, AUC_dev,
+                   AUC_test, precision_test, recall_test, file_result):
         with open(file_result, 'a') as f:
-            result = map(str, [epoch, time, loss, auc_dev,
-                               auc_test, precision, recall])
+            result = map(str, [epoch, time, loss_train, AUC_dev,
+                               AUC_test, precision_test, recall_test])
             f.write('\t'.join(result) + '\n')
 
-    def save_model(self, model, file_name):
-        torch.save(model.state_dict(), file_name)
+    def save_model(self, model, filename):
+        torch.save(model.state_dict(), filename)
 
 
-def load_tensor(file_name, dtype):
-    return [dtype(d).to(device) for d in np.load(file_name + '.npy')]
+def load_tensor(filename, dtype):
+    return [dtype(d).to(device) for d in np.load(filename + '.npy')]
 
 
-def load_numpy(file_name):
-    return np.load(file_name + '.npy')
+def load_numpy(filename):
+    return np.load(filename + '.npy')
 
 
-def load_pickle(file_name):
-    with open(file_name, 'rb') as f:
+def load_pickle(filename):
+    with open(filename, 'rb') as f:
         return pickle.load(f)
 
 
@@ -151,12 +182,16 @@ def split_dataset(dataset, ratio):
 
 if __name__ == "__main__":
 
-    (DATASET, radius, dim, layer, batch, lr, lr_decay, decay_interval,
-     iteration, setting) = sys.argv[1:]
-    (dim, layer, batch, decay_interval,
-     iteration) = map(int, [dim, layer, batch, decay_interval, iteration])
-    lr, lr_decay = map(float, [lr, lr_decay])
+    """Hyperparameters."""
+    (DATASET, radius, update, output, dim, hidden_layer, output_layer, batch,
+     lr, lr_decay, decay_interval, weight_decay, iteration,
+     setting) = sys.argv[1:]
+    (dim, hidden_layer, output_layer, batch, decay_interval,
+     iteration) = map(int, [dim, hidden_layer, output_layer, batch,
+                            decay_interval, iteration])
+    lr, lr_decay, weight_decay = map(float, [lr, lr_decay, weight_decay])
 
+    """CPU or GPU."""
     if torch.cuda.is_available():
         device = torch.device('cuda')
         print('The code uses GPU...')
@@ -164,55 +199,59 @@ if __name__ == "__main__":
         device = torch.device('cpu')
         print('The code uses CPU!!!')
 
+    """Load preprocessed data."""
     dir_input = ('../../dataset/classification/' + DATASET +
                  '/input/radius' + radius + '/')
-    molecules = load_tensor(dir_input + 'molecules', torch.LongTensor)
+    with open(dir_input + 'Smiles.txt') as f:
+        Smiles = f.read().strip().split()
+    Molecules = load_tensor(dir_input + 'Molecules', torch.LongTensor)
     adjacencies = load_numpy(dir_input + 'adjacencies')
-    t_properties = load_tensor(dir_input + 'properties', torch.LongTensor)
+    correct_properties = load_tensor(dir_input + 'properties',
+                                     torch.LongTensor)
     with open(dir_input + 'fingerprint_dict.pickle', 'rb') as f:
         fingerprint_dict = pickle.load(f)
+    fingerprint_dict = load_pickle(dir_input + 'fingerprint_dict.pickle')
+    n_fingerprint = len(fingerprint_dict)
 
-    dataset = list(zip(molecules, adjacencies, t_properties))
+    """Create a dataset and split it into train/dev/test."""
+    dataset = list(zip(Smiles, Molecules, adjacencies, correct_properties))
     dataset = shuffle_dataset(dataset, 1234)
     dataset_train, dataset_ = split_dataset(dataset, 0.8)
     dataset_dev, dataset_test = split_dataset(dataset_, 0.5)
 
-    fingerprint_dict = load_pickle(dir_input + 'fingerprint_dict.pickle')
-    unknown = 100
-    n_fingerprint = len(fingerprint_dict) + unknown
-
+    """Set a model."""
     torch.manual_seed(1234)
-    model = MolecularPropertyPrediction().to(device)
+    model = GraphNeuralNetwork().to(device)
     trainer = Trainer(model)
     tester = Tester(model)
 
-    file_result = '../../output/result/' + setting + '.txt'
-    with open(file_result, 'w') as f:
-        f.write('Epoch\tTime(sec)\tLoss_train\tAUC_dev\t'
-                'AUC_test\tPrecision_test\tRecall_test\n')
-
+    """Output files."""
+    file_AUC = '../../output/result/AUC--' + setting + '.txt'
     file_model = '../../output/model/' + setting
+    result = ('Epoch\tTime(sec)\tLoss_train\tAUC_dev\t'
+              'AUC_test\tPrecision_test\tRecall_test\n')
+    with open(file_AUC, 'w') as f:
+        f.write(result + '\n')
+    print(result)
 
-    print('Training...')
-    print('Epoch Time(sec) Loss_train AUC_dev '
-          'AUC_test Precision_test Recall_test')
-
+    """Start training."""
     start = timeit.default_timer()
+    for epoch in range(1, iteration):
 
-    for epoch in range(iteration):
-
-        if (epoch+1) % decay_interval == 0:
+        if epoch % decay_interval == 0:
             trainer.optimizer.param_groups[0]['lr'] *= lr_decay
 
-        loss = trainer.train(dataset_train)
-        auc_dev = tester.test(dataset_dev)[0]
-        auc_test, precision, recall = tester.test(dataset_test)
+        loss_train = trainer.train(dataset_train)
+        AUC_dev = tester.test(dataset_dev)[0]
+        AUC_test, precision_test, recall_test = tester.test(dataset_test)
 
         end = timeit.default_timer()
         time = end - start
 
-        tester.result(epoch, time, loss, auc_dev,
-                      auc_test, precision, recall, file_result)
+        tester.result_AUC(epoch, time, loss_train, AUC_dev,
+                          AUC_test, precision_test, recall_test, file_AUC)
         tester.save_model(model, file_model)
 
-        print(epoch, time, loss, auc_dev, auc_test, precision, recall)
+        result = [epoch, time, loss_train, AUC_dev,
+                  AUC_test, precision_test, recall_test]
+        print('\t'.join(map(str, result)))
