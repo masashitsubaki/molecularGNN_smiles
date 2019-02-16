@@ -21,7 +21,7 @@ def create_atoms(mol):
 
 def create_ijbonddict(mol):
     """Create a dictionary, which each key is a node ID
-    and each value is the tuple of its neighboring node
+    and each value is the tuples of its neighboring node
     and bond (e.g., single and double) IDs."""
     i_jbond_dict = defaultdict(lambda: [])
     for b in mol.GetBonds():
