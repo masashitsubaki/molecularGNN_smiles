@@ -1,11 +1,7 @@
 # Graph neural network (GNN) for molecules
 
-This is the code of a graph neural network (GNN) for molecules, which is based on learning representations of r-radius subgraphs (or called fingerprints) in molecules.
+This is a code of a graph neural network (GNN) for molecules, which is based on learning representations of r-radius subgraphs (or called fingerprints) in molecules.
 This GNN is proposed in our paper "[Compound-protein Interaction Prediction with End-to-end Learning of Neural Networks for Graphs and Sequences (Bioinformatics, 2018)](https://academic.oup.com/bioinformatics/advance-article-abstract/doi/10.1093/bioinformatics/bty535/5050020?redirectedFrom=PDF)," which aims to predict compound-protein interactions for drug discovery. In this implementation, using the proposed GNN we provide a model for predicting various molecular properties such as drug efficacy and photovoltaic efficiency.
-
-<div align="center">
-<p><img src="overview.jpeg" width="600" /></p>
-</div>
 
 
 ## Characteristics
@@ -23,10 +19,9 @@ The basic idea of a GNN can be described as follows:
 </div>
 
 The GNN updates the randomly initialized atom vectors in a molecule,
-obtains the molecular vector by summing (or mean) the atom vectors,
-and then learns the parameters of the neural networks including the atom vectors
-via backpropagation to predict molecular properties
-(i.e., this is an end-to-end learning without input features or descriptors used in chemoinformatics).
+obtains the molecular vector, and then learns the parameters of the neural networks
+including the atom vectors via backpropagation to predict molecular properties
+(i.e., this is an end-to-end learning without input features or descriptors in chemoinformatics).
 
 Our GNN, based on the r-radius subgraphs (or fingerprints), can be described as follows:
 
@@ -34,9 +29,9 @@ Our GNN, based on the r-radius subgraphs (or fingerprints), can be described as 
 <p><img src="our_GNN.jpeg" width="500" /></p>
 </div>
 
-Thus, instead of using atom vectors, we extract r-radius subgraphs (i.e., fingerprints) from a molecule,
+Thus, instead of using atom vectors, we extract r-radius subgraphs from a molecule,
 initialize them using random vectors, and then learn the representations.
-This leads to the representation learning of molecular fingerprints.
+This leads to the representation learning for r-radius subgraphs in molecules.
 
 
 ## Requirements

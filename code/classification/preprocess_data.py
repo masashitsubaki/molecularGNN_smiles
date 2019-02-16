@@ -9,15 +9,20 @@ from rdkit import Chem
 
 
 def create_atoms(mol):
+    """Create a list of atom (e.g., hydrogen and oxygen) IDs
+    considering the aromaticity."""
     atoms = [a.GetSymbol() for a in mol.GetAtoms()]
     for a in mol.GetAromaticAtoms():
         i = a.GetIdx()
-        atoms[i] = (atoms[i], 'aromatic')  # Consider aromaticity.
+        atoms[i] = (atoms[i], 'aromatic')
     atoms = [atom_dict[a] for a in atoms]
     return np.array(atoms)
 
 
 def create_ijbonddict(mol):
+    """Create a dictionary, which each key is a node ID
+    and each value is the tuple of its neighboring node
+    and bond (e.g., single and double) IDs."""
     i_jbond_dict = defaultdict(lambda: [])
     for b in mol.GetBonds():
         i, j = b.GetBeginAtomIdx(), b.GetEndAtomIdx()
@@ -27,8 +32,8 @@ def create_ijbonddict(mol):
     return i_jbond_dict
 
 
-def create_fingerprints(atoms, i_jbond_dict, radius):
-    """Extract the r-radius subgraphs (or fingerprints)
+def extract_fingerprints(atoms, i_jbond_dict, radius):
+    """Extract the r-radius subgraphs (i.e., fingerprints)
     from a molecular graph using Weisfeiler-Lehman algorithm."""
 
     if (len(atoms) == 1) or (radius == 0):
@@ -40,7 +45,7 @@ def create_fingerprints(atoms, i_jbond_dict, radius):
 
         for _ in range(radius):
 
-            """Update vertex IDs considering neighboring nodes and edges
+            """Update each node ID considering its neighboring nodes and edges
             (i.e., r-radius subgraphs or fingerprints)."""
             fingerprints = []
             for i, j_edge in i_jedge_dict.items():
@@ -49,7 +54,8 @@ def create_fingerprints(atoms, i_jbond_dict, radius):
                 fingerprints.append(fingerprint_dict[fingerprint])
             nodes = fingerprints
 
-            """Also update edge IDs considering nodes on both sides."""
+            """Also update each edge ID considering two nodes
+            on its both sides."""
             _i_jedge_dict = defaultdict(lambda: [])
             for i, j_edge in i_jedge_dict.items():
                 for j, edge in j_edge:
@@ -90,7 +96,7 @@ if __name__ == "__main__":
     fingerprint_dict = defaultdict(lambda: len(fingerprint_dict))
     edge_dict = defaultdict(lambda: len(edge_dict))
 
-    Smiles, Molecules, adjacencies, properties = '', [], [], []
+    Smiles, molecules, adjacencies, properties = '', [], [], []
 
     for no, data in enumerate(data_list):
 
@@ -99,12 +105,12 @@ if __name__ == "__main__":
         smiles, property = data.strip().split()
         Smiles += smiles + '\n'
 
-        mol = Chem.AddHs(Chem.MolFromSmiles(smiles))  # Consider hydrogens.
+        mol = Chem.AddHs(Chem.MolFromSmiles(smiles))  # AddHs.
         atoms = create_atoms(mol)
         i_jbond_dict = create_ijbonddict(mol)
 
-        fingerprints = create_fingerprints(atoms, i_jbond_dict, radius)
-        Molecules.append(fingerprints)
+        fingerprints = extract_fingerprints(atoms, i_jbond_dict, radius)
+        molecules.append(fingerprints)
 
         adjacency = create_adjacency(mol)
         adjacencies.append(adjacency)
@@ -118,7 +124,7 @@ if __name__ == "__main__":
 
     with open(dir_input + 'Smiles.txt', 'w') as f:
         f.write(Smiles)
-    np.save(dir_input + 'Molecules', Molecules)
+    np.save(dir_input + 'molecules', molecules)
     np.save(dir_input + 'adjacencies', adjacencies)
     np.save(dir_input + 'properties', properties)
     dump_dictionary(fingerprint_dict, dir_input + 'fingerprint_dict.pickle')

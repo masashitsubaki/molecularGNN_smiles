@@ -19,7 +19,7 @@ batch=32
 lr=1e-3
 lr_decay=0.9
 decay_interval=10
-weight_decay=0.0
+weight_decay=1e-6
 iteration=300
 
 setting=$DATASET--radius$radius--update_$update--output_$output--dim$dim--hidden_layer$hidden_layer--output_layer$output_layer--batch$batch--lr$lr--lr_decay$lr_decay--decay_interval$decay_interval--weight_decay$weight_decay--iteration$iteration

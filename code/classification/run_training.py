@@ -42,7 +42,10 @@ class GraphNeuralNetwork(nn.Module):
         y = list(map(lambda x: torch.mean(x, 0), torch.split(xs, axis)))
         return torch.stack(y)
 
-    def gnn(self, xs, A, M, i):
+    def update(self, xs, A, M, i):
+        """Update the node vectors in a graph
+        considering their neighboring node vectors (i.e., sum or mean),
+        which are non-linear transformed by a neural network."""
         hs = torch.relu(self.W_fingerprint[i](xs))
         if update == 'sum':
             return xs + torch.matmul(A, hs)
@@ -61,9 +64,10 @@ class GraphNeuralNetwork(nn.Module):
         fingerprint_vectors = self.embed_fingerprint(fingerprints)
         adjacencies = self.pad(adjacencies, 0)
 
+        """GNN updates fingerprint vectors."""
         for i in range(hidden_layer):
-            fingerprint_vectors = self.gnn(fingerprint_vectors,
-                                           adjacencies, M, i)
+            fingerprint_vectors = self.update(fingerprint_vectors,
+                                              adjacencies, M, i)
 
         if output == 'sum':
             molecular_vectors = self.sum_axis(fingerprint_vectors, axis)
@@ -73,9 +77,9 @@ class GraphNeuralNetwork(nn.Module):
         for j in range(output_layer):
             molecular_vectors = torch.relu(self.W_output[j](molecular_vectors))
 
-        predicted_properties = self.W_property(molecular_vectors)
+        molecular_properties = self.W_property(molecular_vectors)
 
-        return Smiles, predicted_properties
+        return Smiles, molecular_properties
 
     def __call__(self, data_batch, train=True):
 

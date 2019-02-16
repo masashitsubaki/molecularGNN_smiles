@@ -40,7 +40,10 @@ class GraphNeuralNetwork(nn.Module):
         y = list(map(lambda x: torch.mean(x, 0), torch.split(xs, axis)))
         return torch.stack(y)
 
-    def gnn(self, xs, A, M, i):
+    def update(self, xs, A, M, i):
+        """Update the node vectors in a graph
+        considering their neighboring node vectors (i.e., sum or mean),
+        which are non-linear transformed by a neural network."""
         hs = torch.relu(self.W_fingerprint[i](xs))
         if update == 'sum':
             return xs + torch.matmul(A, hs)
@@ -59,9 +62,10 @@ class GraphNeuralNetwork(nn.Module):
         fingerprint_vectors = self.embed_fingerprint(fingerprints)
         adjacencies = self.pad(adjacencies, 0)
 
+        """GNN updates fingerprint vectors."""
         for i in range(hidden_layer):
-            fingerprint_vectors = self.gnn(fingerprint_vectors,
-                                           adjacencies, M, i)
+            fingerprint_vectors = self.update(fingerprint_vectors,
+                                              adjacencies, M, i)
 
         if output == 'sum':
             molecular_vectors = self.sum_axis(fingerprint_vectors, axis)
@@ -71,9 +75,9 @@ class GraphNeuralNetwork(nn.Module):
         for j in range(output_layer):
             molecular_vectors = torch.relu(self.W_output[j](molecular_vectors))
 
-        predicted_properties = self.W_property(molecular_vectors)
+        molecular_properties = self.W_property(molecular_vectors)
 
-        return Smiles, predicted_properties
+        return Smiles, molecular_properties
 
     def __call__(self, data_batch, train=True):
 
@@ -135,7 +139,7 @@ class Tester(object):
             result_list = [epoch, time, loss_train, MSE_dev, MSE_test]
             f.write('\t'.join(map(str, result_list)) + '\n')
 
-    def result_test(self, predictions, filename):
+    def result_predictions(self, predictions, filename):
         with open(filename, 'w') as f:
             f.write('Smiles\tCorrect\tPredict\n')
             f.write('\n'.join(['\t'.join(p) for p in predictions]) + '\n')
@@ -193,7 +197,7 @@ if __name__ == "__main__":
                  '/input/radius' + radius + '/')
     with open(dir_input + 'Smiles.txt') as f:
         Smiles = f.read().strip().split()
-    Molecules = load_tensor(dir_input + 'Molecules', torch.LongTensor)
+    molecules = load_tensor(dir_input + 'molecules', torch.LongTensor)
     adjacencies = load_numpy(dir_input + 'adjacencies')
     correct_properties = load_tensor(dir_input + 'properties',
                                      torch.FloatTensor)
@@ -205,7 +209,7 @@ if __name__ == "__main__":
     n_fingerprint = len(fingerprint_dict)
 
     """Create a dataset and split it into train/dev/test."""
-    dataset = list(zip(Smiles, Molecules, adjacencies, correct_properties))
+    dataset = list(zip(Smiles, molecules, adjacencies, correct_properties))
     dataset = shuffle_dataset(dataset, 1234)
     dataset_train, dataset_ = split_dataset(dataset, 0.8)
     dataset_dev, dataset_test = split_dataset(dataset_, 0.5)
@@ -240,7 +244,7 @@ if __name__ == "__main__":
         time = end - start
 
         tester.result_MSE(epoch, time, loss_train, MSE_dev, MSE_test, file_MSE)
-        tester.result_test(predictions_test, file_predictions)
+        tester.result_predictions(predictions_test, file_predictions)
         tester.save_model(model, file_model)
 
         result = [epoch, time, loss_train, MSE_dev, MSE_test]
