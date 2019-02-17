@@ -22,14 +22,14 @@ class GraphNeuralNetwork(nn.Module):
 
     def pad(self, matrices, pad_value):
         """Pad adjacency matrices for batch processing."""
-        sizes = [d.shape[0] for d in matrices]
-        D = sum(sizes)
-        pad_matrices = pad_value + np.zeros((D, D))
-        m = 0
-        for i, d in enumerate(matrices):
-            s_i = sizes[i]
-            pad_matrices[m:m+s_i, m:m+s_i] = d
-            m += s_i
+        sizes = [m.shape[0] for m in matrices]
+        M = sum(sizes)
+        pad_matrices = pad_value + np.zeros((M, M))
+        i = 0
+        for j, m in enumerate(matrices):
+            j = sizes[j]
+            pad_matrices[i:i+j, i:i+j] = m
+            i += j
         return torch.FloatTensor(pad_matrices).to(device)
 
     def sum_axis(self, xs, axis):
@@ -43,7 +43,7 @@ class GraphNeuralNetwork(nn.Module):
     def update(self, xs, A, M, i):
         """Update the node vectors in a graph
         considering their neighboring node vectors (i.e., sum or mean),
-        which are non-linear transformed by a neural network."""
+        which are non-linear transformed by neural network."""
         hs = torch.relu(self.W_fingerprint[i](xs))
         if update == 'sum':
             return xs + torch.matmul(A, hs)
@@ -62,7 +62,7 @@ class GraphNeuralNetwork(nn.Module):
         fingerprint_vectors = self.embed_fingerprint(fingerprints)
         adjacencies = self.pad(adjacencies, 0)
 
-        """GNN updates fingerprint vectors."""
+        """GNN updates the fingerprint vectors."""
         for i in range(hidden_layer):
             fingerprint_vectors = self.update(fingerprint_vectors,
                                               adjacencies, M, i)
@@ -134,12 +134,11 @@ class Tester(object):
         MSE = SE_sum / N
         return MSE, zip(SMILES, T, Y)
 
-    def result_MSE(self, epoch, time, loss_train, MSE_dev, MSE_test, filename):
+    def save_MSEs(self, MSEs, filename):
         with open(filename, 'a') as f:
-            result_list = [epoch, time, loss_train, MSE_dev, MSE_test]
-            f.write('\t'.join(map(str, result_list)) + '\n')
+            f.write('\t'.join(map(str, MSEs)) + '\n')
 
-    def result_predictions(self, predictions, filename):
+    def save_predictions(self, predictions, filename):
         with open(filename, 'w') as f:
             f.write('Smiles\tCorrect\tPredict\n')
             f.write('\n'.join(['\t'.join(p) for p in predictions]) + '\n')
@@ -154,11 +153,6 @@ def load_tensor(filename, dtype):
 
 def load_numpy(filename):
     return np.load(filename + '.npy')
-
-
-def load_pickle(filename):
-    with open(filename, 'rb') as f:
-        return pickle.load(f)
 
 
 def shuffle_dataset(dataset, seed):
@@ -192,7 +186,7 @@ if __name__ == "__main__":
         device = torch.device('cpu')
         print('The code uses CPU!!!')
 
-    """Load preprocessed data."""
+    """Load each preprocessed data."""
     dir_input = ('../../dataset/regression/' + DATASET +
                  '/input/radius' + radius + '/')
     with open(dir_input + 'Smiles.txt') as f:
@@ -205,7 +199,6 @@ if __name__ == "__main__":
     std = load_numpy(dir_input + 'std')
     with open(dir_input + 'fingerprint_dict.pickle', 'rb') as f:
         fingerprint_dict = pickle.load(f)
-    fingerprint_dict = load_pickle(dir_input + 'fingerprint_dict.pickle')
     n_fingerprint = len(fingerprint_dict)
 
     """Create a dataset and split it into train/dev/test."""
@@ -221,13 +214,13 @@ if __name__ == "__main__":
     tester = Tester(model)
 
     """Output files."""
-    file_MSE = '../../output/result/MSE--' + setting + '.txt'
+    file_MSEs = '../../output/result/MSEs--' + setting + '.txt'
     file_predictions = '../../output/result/predictions--' + setting + '.txt'
     file_model = '../../output/model/' + setting
-    result = 'Epoch\tTime(sec)\tLoss_train\tMSE_dev\tMSE_test'
-    with open(file_MSE, 'w') as f:
-        f.write(result + '\n')
-    print(result)
+    MSEs = 'Epoch\tTime(sec)\tLoss_train\tMSE_dev\tMSE_test'
+    with open(file_MSEs, 'w') as f:
+        f.write(MSEs + '\n')
+    print(MSEs)
 
     """Start training."""
     start = timeit.default_timer()
@@ -243,9 +236,9 @@ if __name__ == "__main__":
         end = timeit.default_timer()
         time = end - start
 
-        tester.result_MSE(epoch, time, loss_train, MSE_dev, MSE_test, file_MSE)
-        tester.result_predictions(predictions_test, file_predictions)
+        MSEs = [epoch, time, loss_train, MSE_dev, MSE_test]
+        tester.save_MSEs(MSEs, file_MSEs)
+        tester.save_predictions(predictions_test, file_predictions)
         tester.save_model(model, file_model)
 
-        result = [epoch, time, loss_train, MSE_dev, MSE_test]
-        print('\t'.join(map(str, result)))
+        print('\t'.join(map(str, MSEs)))

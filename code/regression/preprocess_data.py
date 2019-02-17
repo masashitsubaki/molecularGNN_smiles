@@ -86,7 +86,7 @@ if __name__ == "__main__":
               '/original/data.txt', 'r') as f:
         data_list = f.read().strip().split('\n')
 
-    """Exclude data contains "." in its smiles."""
+    """Exclude data contains "." in the smiles."""
     data_list = list(filter(lambda x:
                      '.' not in x.strip().split()[0], data_list))
     N = len(data_list)
@@ -105,7 +105,7 @@ if __name__ == "__main__":
         smiles, property = data.strip().split()
         Smiles += smiles + '\n'
 
-        mol = Chem.AddHs(Chem.MolFromSmiles(smiles))  # AddHs.
+        mol = Chem.AddHs(Chem.MolFromSmiles(smiles))  # Consider hydrogens.
         atoms = create_atoms(mol)
         i_jbond_dict = create_ijbonddict(mol)
 
@@ -118,9 +118,9 @@ if __name__ == "__main__":
         properties.append([[float(property)]])
 
     """Normalize properties (i.e., mean 0 and std 1)."""
-    p = np.array(properties)
-    mean, std = np.mean(p), np.std(p)
-    properties = np.array((p - mean) / std)
+    properties = np.array(properties)
+    mean, std = np.mean(properties), np.std(properties)
+    properties = np.array((properties - mean) / std)
 
     dir_input = ('../../dataset/regression/' + DATASET +
                  '/input/radius' + str(radius) + '/')

@@ -24,14 +24,14 @@ class GraphNeuralNetwork(nn.Module):
 
     def pad(self, matrices, pad_value):
         """Pad adjacency matrices for batch processing."""
-        sizes = [d.shape[0] for d in matrices]
-        D = sum(sizes)
-        pad_matrices = pad_value + np.zeros((D, D))
-        m = 0
-        for i, d in enumerate(matrices):
-            s_i = sizes[i]
-            pad_matrices[m:m+s_i, m:m+s_i] = d
-            m += s_i
+        sizes = [m.shape[0] for m in matrices]
+        M = sum(sizes)
+        pad_matrices = pad_value + np.zeros((M, M))
+        i = 0
+        for j, m in enumerate(matrices):
+            j = sizes[j]
+            pad_matrices[i:i+j, i:i+j] = m
+            i += j
         return torch.FloatTensor(pad_matrices).to(device)
 
     def sum_axis(self, xs, axis):
@@ -45,7 +45,7 @@ class GraphNeuralNetwork(nn.Module):
     def update(self, xs, A, M, i):
         """Update the node vectors in a graph
         considering their neighboring node vectors (i.e., sum or mean),
-        which are non-linear transformed by a neural network."""
+        which are non-linear transformed by neural network."""
         hs = torch.relu(self.W_fingerprint[i](xs))
         if update == 'sum':
             return xs + torch.matmul(A, hs)
@@ -64,7 +64,7 @@ class GraphNeuralNetwork(nn.Module):
         fingerprint_vectors = self.embed_fingerprint(fingerprints)
         adjacencies = self.pad(adjacencies, 0)
 
-        """GNN updates fingerprint vectors."""
+        """GNN updates the fingerprint vectors."""
         for i in range(hidden_layer):
             fingerprint_vectors = self.update(fingerprint_vectors,
                                               adjacencies, M, i)
@@ -148,12 +148,9 @@ class Tester(object):
 
         return AUC, precision, recall
 
-    def result_AUC(self, epoch, time, loss_train, AUC_dev,
-                   AUC_test, precision_test, recall_test, file_result):
-        with open(file_result, 'a') as f:
-            result = map(str, [epoch, time, loss_train, AUC_dev,
-                               AUC_test, precision_test, recall_test])
-            f.write('\t'.join(result) + '\n')
+    def save_AUCs(self, AUCs, filename):
+        with open(filename, 'a') as f:
+            f.write('\t'.join(map(str, AUCs)) + '\n')
 
     def save_model(self, model, filename):
         torch.save(model.state_dict(), filename)
@@ -230,13 +227,13 @@ if __name__ == "__main__":
     tester = Tester(model)
 
     """Output files."""
-    file_AUC = '../../output/result/AUC--' + setting + '.txt'
+    file_AUCs = '../../output/result/AUCs--' + setting + '.txt'
     file_model = '../../output/model/' + setting
-    result = ('Epoch\tTime(sec)\tLoss_train\tAUC_dev\t'
-              'AUC_test\tPrecision_test\tRecall_test\n')
-    with open(file_AUC, 'w') as f:
-        f.write(result + '\n')
-    print(result)
+    AUCs = ('Epoch\tTime(sec)\tLoss_train\tAUC_dev\t'
+            'AUC_test\tPrecision_test\tRecall_test')
+    with open(file_AUCs, 'w') as f:
+        f.write(AUCs + '\n')
+    print(AUCs)
 
     """Start training."""
     start = timeit.default_timer()
@@ -252,10 +249,9 @@ if __name__ == "__main__":
         end = timeit.default_timer()
         time = end - start
 
-        tester.result_AUC(epoch, time, loss_train, AUC_dev,
-                          AUC_test, precision_test, recall_test, file_AUC)
+        AUCs = [epoch, time, loss_train, AUC_dev,
+                AUC_test, precision_test, recall_test]
+        tester.save_AUCs(AUCs, file_AUCs)
         tester.save_model(model, file_model)
 
-        result = [epoch, time, loss_train, AUC_dev,
-                  AUC_test, precision_test, recall_test]
-        print('\t'.join(map(str, result)))
+        print('\t'.join(map(str, AUCs)))

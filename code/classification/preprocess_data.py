@@ -86,7 +86,7 @@ if __name__ == "__main__":
               '/original/data.txt', 'r') as f:
         data_list = f.read().strip().split('\n')
 
-    """Exclude data contains "." in its smiles."""
+    """Exclude data contains "." in the smiles."""
     data_list = list(filter(lambda x:
                      '.' not in x.strip().split()[0], data_list))
     N = len(data_list)
@@ -105,7 +105,7 @@ if __name__ == "__main__":
         smiles, property = data.strip().split()
         Smiles += smiles + '\n'
 
-        mol = Chem.AddHs(Chem.MolFromSmiles(smiles))  # AddHs.
+        mol = Chem.AddHs(Chem.MolFromSmiles(smiles))  # Consider hydrogens.
         atoms = create_atoms(mol)
         i_jbond_dict = create_ijbonddict(mol)
 
