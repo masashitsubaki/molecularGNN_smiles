@@ -62,6 +62,7 @@ class GraphNeuralNetwork(nn.Module):
 
         fingerprints = torch.cat(fingerprints)
         fingerprint_vectors = self.embed_fingerprint(fingerprints)
+
         adjacencies = self.pad(adjacencies, 0)
 
         """GNN updates the fingerprint vectors."""
