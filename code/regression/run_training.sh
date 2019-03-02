@@ -3,8 +3,9 @@
 DATASET=photovoltaic
 # DATASET=yourdata
 
-radius=1
-# radius=2
+# radius=1
+radius=2
+# radius=3
 
 update=sum
 # update=mean

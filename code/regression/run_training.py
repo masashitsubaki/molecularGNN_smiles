@@ -90,10 +90,15 @@ class GraphNeuralNetwork(nn.Module):
             loss = F.mse_loss(correct_properties, predicted_properties)
             return loss
         else:
-            ts = std * correct_properties.to('cpu').data.numpy() + mean
-            ys = std * predicted_properties.to('cpu').data.numpy() + mean
-            ts, ys = np.concatenate(ts), np.concatenate(ys)
-            return Smiles, ts, ys
+            """Transform the normalized property (i.e., mean 0 and std 1)
+            to the unit-based property (e.g., eV and kcal/mol)."""
+            correct_properties, predicted_properties = (
+                correct_properties.to('cpu').data.numpy(),
+                predicted_properties.to('cpu').data.numpy())
+            correct_properties, predicted_properties = (
+                std * np.concatenate(correct_properties) + mean,
+                std * np.concatenate(predicted_properties) + mean)
+            return Smiles, correct_properties, predicted_properties
 
 
 class Trainer(object):
@@ -125,11 +130,12 @@ class Tester(object):
         SMILES, Ts, Ys, SE_sum = '', [], [], 0
         for i in range(0, N, batch):
             data_batch = list(zip(*dataset[i:i+batch]))
-            Smiles, ts, ys = self.model(data_batch, train=False)
+            (Smiles, correct_properties,
+             predicted_properties) = self.model(data_batch, train=False)
             SMILES += ' '.join(Smiles) + ' '
-            Ts.append(ts)
-            Ys.append(ys)
-            SE_sum += sum((ts-ys)**2)
+            Ts.append(correct_properties)
+            Ys.append(predicted_properties)
+            SE_sum += sum((correct_properties-predicted_properties)**2)
         SMILES = SMILES.strip().split()
         T, Y = map(str, np.concatenate(Ts)), map(str, np.concatenate(Ys))
         MSE = SE_sum / N
