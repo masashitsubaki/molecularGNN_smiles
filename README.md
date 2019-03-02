@@ -1,7 +1,7 @@
 # Graph neural network (GNN) for molecules
 
 This is a code of a graph neural network (GNN) for molecules, which is based on learning representations of r-radius subgraphs (or called fingerprints) in molecules.
-This GNN is proposed in our paper "[Compound-protein Interaction Prediction with End-to-end Learning of Neural Networks for Graphs and Sequences (Bioinformatics, 2018)](https://academic.oup.com/bioinformatics/advance-article-abstract/doi/10.1093/bioinformatics/bty535/5050020?redirectedFrom=PDF)," which aims to predict compound-protein interactions for drug discovery. Using the proposed GNN, in this page we provide an implementation for predicting various molecular properties such as drug efficacy and photovoltaic efficiency.
+This GNN is proposed in our paper "[Compound-protein Interaction Prediction with End-to-end Learning of Neural Networks for Graphs and Sequences (Bioinformatics, 2018)](https://academic.oup.com/bioinformatics/advance-article-abstract/doi/10.1093/bioinformatics/bty535/5050020?redirectedFrom=PDF)," which aims to predict compound-protein interactions for drug discovery. Using the proposed GNN, in this page we provide an implementation of the model for predicting various molecular properties such as drug efficacy and photovoltaic efficiency.
 
 <div align="center">
 <p><img src="overview.jpeg" width="600" /></p>
@@ -24,14 +24,15 @@ The basic idea of a GNN can be described as follows:
 
 The GNN updates the randomly initialized atom vectors in a molecule,
 obtains the molecular vector, and then learns the parameters of the neural networks
-including the atom vectors via backpropagation to predict the molecular properties
-(i.e., this is an end-to-end learning without input features or descriptors used in chemoinformatics).
+including the atom vectors via backpropagation to predict the molecular properties.
+That is, this is an end-to-end learning that does not require
+input features or descriptors used in chemoinformatics.
 
 In drug compounds, for example, each atom, chemical bond, and their connections
-in a molecular graph are not very important.
-More important in drug compounds is to consider large fragments of molecular graphs,
+in a molecular graph are not so important.
+More important in drug compounds is to consider relatively large fragments of molecular graphs,
 e.g., [β-lactam in penicillin](https://en.wikipedia.org/wiki/%CE%92-lactam_antibiotic).
-Such large fragments are called r-radius subgraphs or molecular fingerprints.
+Such fragments are called r-radius subgraphs or molecular fingerprints.
 Based on this observation, our GNN leverages molecular fingerprints
 and the model can be described as follows:
 
@@ -81,7 +82,7 @@ On the photovoltaic efficiency dataset,
 the learning curve (x-axis is epoch and y-axis is error) is as follows:
 
 <div align="center">
-<p><img src="learningcurve_photovoltaic.jpeg" width="500" /></p>
+<p><img src="learningcurve_photovoltaic.jpeg" width="400" /></p>
 </div>
 
 This result can be reproduce by the above two commands (i) and (ii).
