@@ -122,7 +122,7 @@ class Tester(object):
 
     def test(self, dataset):
         N = len(dataset)
-        SMILES, Ys, Ts, SE_sum = '', [], [], 0
+        SMILES, Ts, Ys, SE_sum = '', [], [], 0
         for i in range(0, N, batch):
             data_batch = list(zip(*dataset[i:i+batch]))
             Smiles, ts, ys = self.model(data_batch, train=False)
@@ -194,8 +194,7 @@ if __name__ == "__main__":
         Smiles = f.read().strip().split()
     molecules = load_tensor(dir_input + 'molecules', torch.LongTensor)
     adjacencies = load_numpy(dir_input + 'adjacencies')
-    correct_properties = load_tensor(dir_input + 'properties',
-                                     torch.FloatTensor)
+    properties = load_tensor(dir_input + 'properties', torch.FloatTensor)
     mean = load_numpy(dir_input + 'mean')
     std = load_numpy(dir_input + 'std')
     with open(dir_input + 'fingerprint_dict.pickle', 'rb') as f:
@@ -203,7 +202,7 @@ if __name__ == "__main__":
     n_fingerprint = len(fingerprint_dict)
 
     """Create a dataset and split it into train/dev/test."""
-    dataset = list(zip(Smiles, molecules, adjacencies, correct_properties))
+    dataset = list(zip(Smiles, molecules, adjacencies, properties))
     dataset = shuffle_dataset(dataset, 1234)
     dataset_train, dataset_ = split_dataset(dataset, 0.8)
     dataset_dev, dataset_test = split_dataset(dataset_, 0.5)

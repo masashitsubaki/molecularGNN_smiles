@@ -86,9 +86,8 @@ if __name__ == "__main__":
               '/original/data.txt', 'r') as f:
         data_list = f.read().strip().split('\n')
 
-    """Exclude data contains "." in the smiles."""
-    data_list = list(filter(lambda x:
-                     '.' not in x.strip().split()[0], data_list))
+    """Exclude data contains '.' in the smiles."""
+    data_list = [d for d in data_list if '.' not in d.strip().split()[0]]
     N = len(data_list)
 
     atom_dict = defaultdict(lambda: len(atom_dict))
@@ -115,8 +114,7 @@ if __name__ == "__main__":
         adjacency = create_adjacency(mol)
         adjacencies.append(adjacency)
 
-        property = np.array([float(property)])
-        properties.append(property)
+        properties.append(np.array([float(property)]))
 
     dir_input = ('../../dataset/classification/' + DATASET +
                  '/input/radius' + str(radius) + '/')

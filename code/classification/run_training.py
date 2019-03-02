@@ -92,12 +92,11 @@ class GraphNeuralNetwork(nn.Module):
             loss = F.cross_entropy(predicted_properties, correct_properties)
             return loss
         else:
-            ts = correct_properties.to('cpu').data.numpy()
+            correct_labels = correct_properties.to('cpu').data.numpy()
             ys = F.softmax(predicted_properties, 1).to('cpu').data.numpy()
-            correct_labels = ts
             predicted_labels = list(map(lambda x: np.argmax(x), ys))
             predicted_scores = list(map(lambda x: x[1], ys))
-            return correct_labels, predicted_labels, predicted_scores
+            return Smiles, correct_labels, predicted_labels, predicted_scores
 
 
 class Trainer(object):
@@ -127,31 +126,41 @@ class Tester(object):
     def test(self, dataset):
 
         N = len(dataset)
-        Correct_labels, Predicted_labels, Predicted_scores = [], [], []
+        SMILES, Ts, Ys, Ss = '', [], [], []
 
         for i in range(0, N, batch):
             data_batch = list(zip(*dataset[i:i+batch]))
 
-            (correct_labels, predicted_labels,
+            (Smiles, correct_labels, predicted_labels,
              predicted_scores) = self.model(data_batch, train=False)
 
-            Correct_labels.append(correct_labels)
-            Predicted_labels.append(predicted_labels)
-            Predicted_scores.append(predicted_scores)
+            SMILES += ' '.join(Smiles) + ' '
+            Ts.append(correct_labels)
+            Ys.append(predicted_labels)
+            Ss.append(predicted_scores)
 
-        correct_labels = np.concatenate(Correct_labels)
-        predicted_labels = np.concatenate(Predicted_labels)
-        predicted_scores = np.concatenate(Predicted_scores)
+        SMILES = SMILES.strip().split()
+        T = np.concatenate(Ts)
+        Y = np.concatenate(Ys)
+        S = np.concatenate(Ss)
 
-        AUC = roc_auc_score(correct_labels, predicted_scores)
-        precision = precision_score(correct_labels, predicted_labels)
-        recall = recall_score(correct_labels, predicted_labels)
+        AUC = roc_auc_score(T, S)
+        precision = precision_score(T, Y)
+        recall = recall_score(T, Y)
 
-        return AUC, precision, recall
+        T, Y, S = map(str, T), map(str, Y), map(str, S)
+        predictions = zip(SMILES, T, Y, S)
+
+        return AUC, precision, recall, predictions
 
     def save_AUCs(self, AUCs, filename):
         with open(filename, 'a') as f:
             f.write('\t'.join(map(str, AUCs)) + '\n')
+
+    def save_predictions(self, predictions, filename):
+        with open(filename, 'w') as f:
+            f.write('Smiles\tCorrect\tPredict\tScore\n')
+            f.write('\n'.join(['\t'.join(p) for p in predictions]) + '\n')
 
     def save_model(self, model, filename):
         torch.save(model.state_dict(), filename)
@@ -163,11 +172,6 @@ def load_tensor(filename, dtype):
 
 def load_numpy(filename):
     return np.load(filename + '.npy')
-
-
-def load_pickle(filename):
-    with open(filename, 'rb') as f:
-        return pickle.load(f)
 
 
 def shuffle_dataset(dataset, seed):
@@ -208,15 +212,13 @@ if __name__ == "__main__":
         Smiles = f.read().strip().split()
     Molecules = load_tensor(dir_input + 'Molecules', torch.LongTensor)
     adjacencies = load_numpy(dir_input + 'adjacencies')
-    correct_properties = load_tensor(dir_input + 'properties',
-                                     torch.LongTensor)
+    properties = load_tensor(dir_input + 'properties', torch.LongTensor)
     with open(dir_input + 'fingerprint_dict.pickle', 'rb') as f:
         fingerprint_dict = pickle.load(f)
-    fingerprint_dict = load_pickle(dir_input + 'fingerprint_dict.pickle')
     n_fingerprint = len(fingerprint_dict)
 
     """Create a dataset and split it into train/dev/test."""
-    dataset = list(zip(Smiles, Molecules, adjacencies, correct_properties))
+    dataset = list(zip(Smiles, Molecules, adjacencies, properties))
     dataset = shuffle_dataset(dataset, 1234)
     dataset_train, dataset_ = split_dataset(dataset, 0.8)
     dataset_dev, dataset_test = split_dataset(dataset_, 0.5)
@@ -229,6 +231,7 @@ if __name__ == "__main__":
 
     """Output files."""
     file_AUCs = '../../output/result/AUCs--' + setting + '.txt'
+    file_predictions = '../../output/result/predictions--' + setting + '.txt'
     file_model = '../../output/model/' + setting
     AUCs = ('Epoch\tTime(sec)\tLoss_train\tAUC_dev\t'
             'AUC_test\tPrecision_test\tRecall_test')
@@ -245,7 +248,8 @@ if __name__ == "__main__":
 
         loss_train = trainer.train(dataset_train)
         AUC_dev = tester.test(dataset_dev)[0]
-        AUC_test, precision_test, recall_test = tester.test(dataset_test)
+        (AUC_test, precision_test, recall_test,
+         predictions_test) = tester.test(dataset_test)
 
         end = timeit.default_timer()
         time = end - start
@@ -253,6 +257,7 @@ if __name__ == "__main__":
         AUCs = [epoch, time, loss_train, AUC_dev,
                 AUC_test, precision_test, recall_test]
         tester.save_AUCs(AUCs, file_AUCs)
+        tester.save_predictions(predictions_test, file_predictions)
         tester.save_model(model, file_model)
 
         print('\t'.join(map(str, AUCs)))
