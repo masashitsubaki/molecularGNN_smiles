@@ -94,11 +94,11 @@ classification (see dataset/classification/HIV/original/data.txt) and
 regression (see dataset/regression/photovoltaic/original/data.txt) as follows:
 
 <div align="center">
-<p><img src="data_classification.jpeg" width="400" /></p>
+<p><img src="data_classification.jpeg" width="600" /></p>
 </div>
 
 <div align="center">
-<p><img src="data_regression.jpeg" width="400" /></p>
+<p><img src="data_regression.jpeg" width="600" /></p>
 </div>
 
 If you prepare a dataset with the same format as "data.txt" in a new directory,
