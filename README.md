@@ -81,7 +81,7 @@ On the photovoltaic efficiency dataset,
 the learning curve (x-axis is epoch and y-axis is error) is as follows:
 
 <div align="center">
-<p><img src="learningcurve_photovoltaic.jpeg" width="600" /></p>
+<p><img src="learningcurve_photovoltaic.jpeg" width="500" /></p>
 </div>
 
 This result can be reproduce by the above two commands (i) and (ii).
