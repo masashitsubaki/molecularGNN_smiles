@@ -83,11 +83,11 @@ bash preprocess_data.sh
 ```
 The preprocessed data are saved in the dataset/input directory.
 
-(ii) Using the preprocessed data, train our neural network with the following command:
+(ii) Using the preprocessed data, train our GNN with the following command:
 ```
 bash run_training.sh
 ```
-The training result and trained model are saved in the output directory (after training, see output/result and output/model).
+The training and test results and the GNN model are saved in the output directory (after training, see output/result and output/model).
 
 (iii) You can change the hyperparameters in preprocess_data.sh and run_training.sh.
 Try to learn various models!
@@ -120,7 +120,7 @@ classification (see dataset/classification/HIV/original/data.txt) as follows:
 </div>
 
 If you prepare a dataset with the same format as "data.txt" in a new directory,
-you can train our neural network using your dataset by the above two commands (i) and (ii).
+you can train our GNN using your dataset by the above two commands (i) and (ii).
 
 
 ## Future work
