@@ -95,7 +95,7 @@ Try to learn various models!
 
 ## Result
 
-On the photovoltaic efficiency dataset,
+On the photovoltaic efficiency dataset in the directory of dataset/regression,
 the learning curve (x-axis is epoch and y-axis is error) is as follows:
 
 <div align="center">
