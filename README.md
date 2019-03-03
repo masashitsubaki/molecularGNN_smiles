@@ -8,7 +8,7 @@ Using the proposed GNN, in this page we provide an implementation of the model
 for predicting various molecular properties such as drug efficacy and photovoltaic efficiency.
 
 <div align="center">
-<p><img src="figure/overview.jpeg" width="600" /></p>
+<p><img src="figures/overview.jpeg" width="600" /></p>
 </div>
 
 
