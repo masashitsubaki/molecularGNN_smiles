@@ -16,7 +16,7 @@ for predicting various molecular properties such as drug efficacy and photovolta
 
 - This code is easy to use. After setting the environment (e.g., PyTorch),
 preprocessing data and learning a model can be done by only two commands (see "Usage").
-- If you prepare a dataset with the same format as provided in the dataset directory,
+- If you prepare a molecular property dataset with the same format as provided in the dataset directory,
 you can learn our GNN with your dataset by the two commands
 (see "Training of our GNN using your molecular property dataset").
 
@@ -87,7 +87,8 @@ The preprocessed data are saved in the dataset/input directory.
 ```
 bash run_training.sh
 ```
-The training and test results and the GNN model are saved in the output directory (after training, see output/result and output/model).
+The training and test results and the GNN model are saved in the output directory
+(after training, see output/result and output/model).
 
 (iii) You can change the hyperparameters in preprocess_data.sh and run_training.sh.
 Try to learn various models!
@@ -119,11 +120,12 @@ classification (see dataset/classification/HIV/original/data.txt) as follows:
 <p><img src="data_classification.jpeg" width="600" /></p>
 </div>
 
-If you prepare a dataset with the same format as "data.txt" in a new directory,
+If you prepare a dataset with the same format as "data.txt" in a new directory
+(e.g., dataset/yourdata/original),
 you can train our GNN using your dataset by the above two commands (i) and (ii).
 
 
-## Future work
+## TODO
 
 - Preprocess data contains "." in the SMILES format (i.e., a molecule contains multi-graphs).
 - Provide some pre-trained model and the demo scripts.

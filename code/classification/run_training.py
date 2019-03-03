@@ -237,10 +237,12 @@ if __name__ == "__main__":
             'AUC_test\tPrecision_test\tRecall_test')
     with open(file_AUCs, 'w') as f:
         f.write(AUCs + '\n')
-    print(AUCs)
 
     """Start training."""
+    print('Training...')
+    print(AUCs)
     start = timeit.default_timer()
+
     for epoch in range(1, iteration):
 
         if epoch % decay_interval == 0:

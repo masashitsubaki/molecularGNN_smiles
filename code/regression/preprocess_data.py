@@ -86,7 +86,7 @@ if __name__ == "__main__":
               '/original/data.txt', 'r') as f:
         data_list = f.read().strip().split('\n')
 
-    """Exclude data contains '.' in the smiles."""
+    """Exclude data contains '.' in the SMILES format."""
     data_list = [d for d in data_list if '.' not in d.strip().split()[0]]
     N = len(data_list)
 
@@ -134,4 +134,4 @@ if __name__ == "__main__":
     np.save(dir_input + 'std', std)
     dump_dictionary(fingerprint_dict, dir_input + 'fingerprint_dict.pickle')
 
-    print('The preprocess has finished!')
+    print('The preprocess of ' + DATASET + ' dataset has finished!')

@@ -226,10 +226,12 @@ if __name__ == "__main__":
     MSEs = 'Epoch\tTime(sec)\tLoss_train\tMSE_dev\tMSE_test'
     with open(file_MSEs, 'w') as f:
         f.write(MSEs + '\n')
-    print(MSEs)
 
     """Start training."""
+    print('Training...')
+    print(MSEs)
     start = timeit.default_timer()
+
     for epoch in range(1, iteration):
 
         if epoch % decay_interval == 0:
