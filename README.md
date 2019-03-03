@@ -79,8 +79,8 @@ using the above preprocessed data to predict a molecular property.
 ### (1) Preprocess data
 
 <div align="center">
-<img src="figures/preprocess_data1.jpeg" width="500">
-<img src="figures/preprocess_data2.jpeg" width="500">
+<img src="figures/preprocess_data1.jpeg" width="700">
+<img src="figures/preprocess_data2.jpeg" width="700">
 </div>
 
 Create the tensor data of molecules and their properties with the following command:
@@ -93,8 +93,8 @@ The preprocessed data are saved in the dataset/input directory.
 ### (2) Run training
 
 <div align="center">
-<img src="figures/run_training1.jpeg" width="500">
-<img src="figures/run_training2.jpeg" width="500">
+<img src="figures/run_training1.jpeg" width="700">
+<img src="figures/run_training2.jpeg" width="700">
 </div>
 
 Using the preprocessed data, train our GNN with the following command:
