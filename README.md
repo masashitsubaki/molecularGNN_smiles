@@ -26,7 +26,7 @@ you can learn our GNN with your dataset by the two commands
 The basic idea of a GNN can be described as follows:
 
 <div align="center">
-<p><img src="figure/basic_GNN.jpeg" width="500" /></p>
+<p><img src="figures/basic_GNN.jpeg" width="500" /></p>
 </div>
 
 The GNN (1) updates the randomly initialized atom vectors
@@ -47,7 +47,7 @@ Based on this observation, our GNN leverages molecular fingerprints
 and the model can be described as follows:
 
 <div align="center">
-<p><img src="figure/our_GNN.jpeg" width="500" /></p>
+<p><img src="figures/our_GNN.jpeg" width="500" /></p>
 </div>
 
 Thus, instead of using atom vectors, we
@@ -79,8 +79,8 @@ using the above preprocessed data to predict a molecular property.
 ### (1) Preprocess data
 
 <div align="center">
-<img src="figure/preprocess_data1.jpeg" width="300">
-<img src="figure/preprocess_data2.jpeg" width="300">
+<img src="figures/preprocess_data1.jpeg" width="300">
+<img src="figures/preprocess_data2.jpeg" width="300">
 </div>
 
 Create the tensor data of molecules and their properties with the following command:
@@ -93,8 +93,8 @@ The preprocessed data are saved in the dataset/input directory.
 ### (2) Run training
 
 <div align="center">
-<img src="figure/run_training1.jpeg" width="300">
-<img src="figure/run_training2.jpeg" width="300">
+<img src="figures/run_training1.jpeg" width="300">
+<img src="figures/run_training2.jpeg" width="300">
 </div>
 
 Using the preprocessed data, train our GNN with the following command:
@@ -115,7 +115,7 @@ On the photovoltaic efficiency dataset in the directory of dataset/regression,
 the learning curve (x-axis is epoch and y-axis is error) is as follows:
 
 <div align="center">
-<p><img src="figure/learningcurve_photovoltaic.jpeg" width="400" /></p>
+<p><img src="figures/learningcurve_photovoltaic.jpeg" width="400" /></p>
 </div>
 
 This result can be reproduce by the above two commands (1) and (2).
@@ -128,11 +128,11 @@ regression (see dataset/regression/photovoltaic/original/data.txt) and
 classification (see dataset/classification/HIV/original/data.txt) as follows:
 
 <div align="center">
-<p><img src="figure/data_regression.jpeg" width="600" /></p>
+<p><img src="figures/data_regression.jpeg" width="600" /></p>
 </div>
 
 <div align="center">
-<p><img src="figure/data_classification.jpeg" width="600" /></p>
+<p><img src="figures/data_classification.jpeg" width="600" /></p>
 </div>
 
 If you prepare a dataset with the same format as "data.txt" in a new directory
