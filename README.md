@@ -140,10 +140,10 @@ If you prepare a dataset with the same format as "data.txt" in a new directory
 you can train our GNN using your dataset by the above two commands (1) and (2).
 
 
-## TODO
+## Future work
 
 - Preprocess data contains "." in the SMILES format (i.e., a molecule contains multi-graphs).
-- Provide some pre-trained model and the demo scripts.
+- Provide some pre-trained models and the demo scripts.
 
 
 ## How to cite
