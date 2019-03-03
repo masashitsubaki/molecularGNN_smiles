@@ -8,7 +8,7 @@ Using the proposed GNN, in this page we provide an implementation of the model
 for predicting various molecular properties such as drug efficacy and photovoltaic efficiency.
 
 <div align="center">
-<p><img src="overview.jpeg" width="600" /></p>
+<p><img src="figure/overview.jpeg" width="600" /></p>
 </div>
 
 
@@ -26,7 +26,7 @@ you can learn our GNN with your dataset by the two commands
 The basic idea of a GNN can be described as follows:
 
 <div align="center">
-<p><img src="basic_GNN.jpeg" width="500" /></p>
+<p><img src="figure/basic_GNN.jpeg" width="500" /></p>
 </div>
 
 The GNN (1) updates the randomly initialized atom vectors
@@ -47,7 +47,7 @@ Based on this observation, our GNN leverages molecular fingerprints
 and the model can be described as follows:
 
 <div align="center">
-<p><img src="our_GNN.jpeg" width="500" /></p>
+<p><img src="figure/our_GNN.jpeg" width="500" /></p>
 </div>
 
 Thus, instead of using atom vectors, we
@@ -76,21 +76,36 @@ from the original data (see dataset/regression or classification/original/data.t
 - code/regression or classification/run_training.py trains our GNN
 using the above preprocessed data to predict a molecular property.
 
-(i) Create the tensor data of molecules and their properties with the following command:
+### (1) Preprocess data
+
+<div align="center">
+<img src="figure/preprocess_data1.jpeg" width="300">
+<img src="figure/preprocess_data2.jpeg" width="300">
+</div>
+
+Create the tensor data of molecules and their properties with the following command:
 ```
 cd code/regression (or cd code/classification)
 bash preprocess_data.sh
 ```
 The preprocessed data are saved in the dataset/input directory.
 
-(ii) Using the preprocessed data, train our GNN with the following command:
+### (2) Run training
+
+<div align="center">
+<img src="figure/run_training1.jpeg" width="300">
+<img src="figure/run_training2.jpeg" width="300">
+</div>
+
+Using the preprocessed data, train our GNN with the following command:
 ```
 bash run_training.sh
 ```
 The training and test results and the GNN model are saved in the output directory
 (after training, see output/result and output/model).
 
-(iii) You can change the hyperparameters in preprocess_data.sh and run_training.sh.
+You can change the hyperparameters in
+preprocess_data.sh and run_training.sh as described in the above figures.
 Try to learn various models!
 
 
@@ -100,10 +115,10 @@ On the photovoltaic efficiency dataset in the directory of dataset/regression,
 the learning curve (x-axis is epoch and y-axis is error) is as follows:
 
 <div align="center">
-<p><img src="learningcurve_photovoltaic.jpeg" width="400" /></p>
+<p><img src="figure/learningcurve_photovoltaic.jpeg" width="400" /></p>
 </div>
 
-This result can be reproduce by the above two commands (i) and (ii).
+This result can be reproduce by the above two commands (1) and (2).
 
 
 ## Training of our GNN using your molecular property dataset
@@ -113,16 +128,16 @@ regression (see dataset/regression/photovoltaic/original/data.txt) and
 classification (see dataset/classification/HIV/original/data.txt) as follows:
 
 <div align="center">
-<p><img src="data_regression.jpeg" width="600" /></p>
+<p><img src="figure/data_regression.jpeg" width="600" /></p>
 </div>
 
 <div align="center">
-<p><img src="data_classification.jpeg" width="600" /></p>
+<p><img src="figure/data_classification.jpeg" width="600" /></p>
 </div>
 
 If you prepare a dataset with the same format as "data.txt" in a new directory
 (e.g., dataset/yourdata/original),
-you can train our GNN using your dataset by the above two commands (i) and (ii).
+you can train our GNN using your dataset by the above two commands (1) and (2).
 
 
 ## TODO
