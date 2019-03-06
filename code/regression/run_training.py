@@ -33,11 +33,11 @@ class GraphNeuralNetwork(nn.Module):
         return torch.FloatTensor(pad_matrices).to(device)
 
     def sum_axis(self, xs, axis):
-        y = list(map(lambda x: torch.sum(x, 0), torch.split(xs, axis)))
+        y = [torch.sum(x, 0) for x in torch.split(xs, axis)]
         return torch.stack(y)
 
     def mean_axis(self, xs, axis):
-        y = list(map(lambda x: torch.mean(x, 0), torch.split(xs, axis)))
+        y = [torch.mean(x, 0) for x in torch.split(xs, axis)]
         return torch.stack(y)
 
     def update(self, xs, A, M, i):
@@ -53,7 +53,7 @@ class GraphNeuralNetwork(nn.Module):
     def forward(self, inputs):
 
         Smiles, fingerprints, adjacencies = inputs
-        axis = list(map(lambda x: len(x), fingerprints))
+        axis = [len(f) for f in fingerprints]
 
         M = np.concatenate([np.repeat(len(f), len(f)) for f in fingerprints])
         M = torch.unsqueeze(torch.FloatTensor(M), 1)
@@ -139,16 +139,17 @@ class Tester(object):
         SMILES = SMILES.strip().split()
         T, Y = map(str, np.concatenate(Ts)), map(str, np.concatenate(Ys))
         MSE = SE_sum / N
-        return MSE, zip(SMILES, T, Y)
+        predictions = '\n'.join(['\t'.join(x) for x in zip(SMILES, T, Y)])
+        return MSE, predictions
 
     def save_MSEs(self, MSEs, filename):
         with open(filename, 'a') as f:
-            f.write('\t'.join(map(str, MSEs)) + '\n')
+            f.write(MSEs + '\n')
 
     def save_predictions(self, predictions, filename):
         with open(filename, 'w') as f:
             f.write('Smiles\tCorrect\tPredict\n')
-            f.write('\n'.join(['\t'.join(p) for p in predictions]) + '\n')
+            f.write(predictions + '\n')
 
     def save_model(self, model, filename):
         torch.save(model.state_dict(), filename)
@@ -244,9 +245,10 @@ if __name__ == "__main__":
         end = timeit.default_timer()
         time = end - start
 
-        MSEs = [epoch, time, loss_train, MSE_dev, MSE_test]
+        MSEs = '\t'.join(map(str, [epoch, time, loss_train,
+                                   MSE_dev, MSE_test]))
         tester.save_MSEs(MSEs, file_MSEs)
         tester.save_predictions(predictions_test, file_predictions)
         tester.save_model(model, file_model)
 
-        print('\t'.join(map(str, MSEs)))
+        print(MSEs)

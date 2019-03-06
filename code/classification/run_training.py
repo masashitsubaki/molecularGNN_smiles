@@ -35,11 +35,11 @@ class GraphNeuralNetwork(nn.Module):
         return torch.FloatTensor(pad_matrices).to(device)
 
     def sum_axis(self, xs, axis):
-        y = list(map(lambda x: torch.sum(x, 0), torch.split(xs, axis)))
+        y = [torch.sum(x, 0) for x in torch.split(xs, axis)]
         return torch.stack(y)
 
     def mean_axis(self, xs, axis):
-        y = list(map(lambda x: torch.mean(x, 0), torch.split(xs, axis)))
+        y = [torch.mean(x, 0) for x in torch.split(xs, axis)]
         return torch.stack(y)
 
     def update(self, xs, A, M, i):
@@ -55,7 +55,7 @@ class GraphNeuralNetwork(nn.Module):
     def forward(self, inputs):
 
         Smiles, fingerprints, adjacencies = inputs
-        axis = list(map(lambda x: len(x), fingerprints))
+        axis = [len(f) for f in fingerprints]
 
         M = np.concatenate([np.repeat(len(f), len(f)) for f in fingerprints])
         M = torch.unsqueeze(torch.FloatTensor(M), 1)
@@ -94,7 +94,7 @@ class GraphNeuralNetwork(nn.Module):
         else:
             correct_labels = correct_properties.to('cpu').data.numpy()
             ys = F.softmax(predicted_properties, 1).to('cpu').data.numpy()
-            predicted_labels = list(map(lambda x: np.argmax(x), ys))
+            predicted_labels = [np.argmax(y) for y in ys]
             predicted_scores = list(map(lambda x: x[1], ys))
             return Smiles, correct_labels, predicted_labels, predicted_scores
 
@@ -149,18 +149,18 @@ class Tester(object):
         recall = recall_score(T, Y)
 
         T, Y, S = map(str, T), map(str, Y), map(str, S)
-        predictions = zip(SMILES, T, Y, S)
+        predictions = '\n'.join(['\t'.join(p) for p in zip(SMILES, T, Y, S)])
 
         return AUC, precision, recall, predictions
 
     def save_AUCs(self, AUCs, filename):
         with open(filename, 'a') as f:
-            f.write('\t'.join(map(str, AUCs)) + '\n')
+            f.write(AUCs + '\n')
 
     def save_predictions(self, predictions, filename):
         with open(filename, 'w') as f:
             f.write('Smiles\tCorrect\tPredict\tScore\n')
-            f.write('\n'.join(['\t'.join(p) for p in predictions]) + '\n')
+            f.write(predictions + '\n')
 
     def save_model(self, model, filename):
         torch.save(model.state_dict(), filename)
@@ -210,7 +210,7 @@ if __name__ == "__main__":
                  '/input/radius' + radius + '/')
     with open(dir_input + 'Smiles.txt') as f:
         Smiles = f.read().strip().split()
-    Molecules = load_tensor(dir_input + 'Molecules', torch.LongTensor)
+    molecules = load_tensor(dir_input + 'molecules', torch.LongTensor)
     adjacencies = load_numpy(dir_input + 'adjacencies')
     properties = load_tensor(dir_input + 'properties', torch.LongTensor)
     with open(dir_input + 'fingerprint_dict.pickle', 'rb') as f:
@@ -218,7 +218,7 @@ if __name__ == "__main__":
     n_fingerprint = len(fingerprint_dict)
 
     """Create a dataset and split it into train/dev/test."""
-    dataset = list(zip(Smiles, Molecules, adjacencies, properties))
+    dataset = list(zip(Smiles, molecules, adjacencies, properties))
     dataset = shuffle_dataset(dataset, 1234)
     dataset_train, dataset_ = split_dataset(dataset, 0.8)
     dataset_dev, dataset_test = split_dataset(dataset_, 0.5)
@@ -256,10 +256,10 @@ if __name__ == "__main__":
         end = timeit.default_timer()
         time = end - start
 
-        AUCs = [epoch, time, loss_train, AUC_dev,
-                AUC_test, precision_test, recall_test]
+        AUCs = '\t'.join(map(str, [epoch, time, loss_train, AUC_dev,
+                                   AUC_test, precision_test, recall_test]))
         tester.save_AUCs(AUCs, file_AUCs)
         tester.save_predictions(predictions_test, file_predictions)
         tester.save_model(model, file_model)
 
-        print('\t'.join(map(str, AUCs)))
+        print(AUCs)

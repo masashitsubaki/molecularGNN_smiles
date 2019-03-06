@@ -116,6 +116,9 @@ if __name__ == "__main__":
 
         properties.append([[float(property)]])
 
+        if no+1 == 100:
+            break
+
     """Normalize properties (i.e., mean 0 and std 1)."""
     properties = np.array(properties)
     mean, std = np.mean(properties), np.std(properties)
