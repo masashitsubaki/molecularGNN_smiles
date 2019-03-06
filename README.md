@@ -26,7 +26,7 @@ you can learn our GNN with your dataset by the two commands
 The basic idea of a GNN can be described as follows:
 
 <div align="center">
-<p><img src="figures/basic_GNN.jpeg" width="500" /></p>
+<p><img src="figures/basic_GNN.jpeg" width="600" /></p>
 </div>
 
 The GNN (1) updates the randomly initialized atom vectors
@@ -47,7 +47,7 @@ Based on this observation, our GNN leverages molecular fingerprints
 and the model can be described as follows:
 
 <div align="center">
-<p><img src="figures/our_GNN.jpeg" width="500" /></p>
+<p><img src="figures/our_GNN.jpeg" width="600" /></p>
 </div>
 
 Thus, instead of using atom vectors, we
