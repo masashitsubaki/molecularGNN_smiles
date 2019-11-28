@@ -69,24 +69,30 @@ This GNN allows us to learn the representations of molecular fingerprints.
 
 We provide two major scripts in the main directory as follows.
 
-- "preprocessing.py" creates tensor data from original text data (see dataset/QM9/data.txt).
+- "preprocessing.py" creates tensor data from original text data (see dataset/././data.txt).
 - "train.py" trains a GNN model using the preprocessed data to predict a molecular property.
 
-You can easy to train a GNN model by the following command.
+You can easy to train a GNN model by the following commands.
 
+Clone our repository,
 ```
-cd main
+git clone https://github.com/masashitsubaki/molecularGNN_smiles.git
+```
+change directory, 
+```
+cd molecularGNN_smiles/main
+```
+and run the bash file for training.
+```
 bash train.sh
 ```
 
-You can also change the model hyperparameters described in train.sh (e.g., the dimensionality, number of hidden layers, and batch size).
+You can also change the model hyperparameters described in train.sh (e.g., the dimensionality, number of hidden layers, and batch size). Try to learn various GNN models to find your own best model for your dataset!
 
 
-## Training of our GNN using your molecular property dataset
+## Learning a GNN with your dataset
 
-In this repository, we provide two datasets of
-regression (see dataset/regression/photovoltaic/data.txt) and
-classification (see dataset/classification/HIV/data.txt) as follows:
+In this repository, we provide two datasets of regression (see dataset/regression/photovoltaic/data.txt) and classification (see dataset/classification/HIV/data.txt) as follows:
 
 <div align="center">
 <p><img src="figures/data_regression.jpeg" width="600" /></p>
@@ -96,8 +102,7 @@ classification (see dataset/classification/HIV/data.txt) as follows:
 <p><img src="figures/data_classification.jpeg" width="600" /></p>
 </div>
 
-If you prepare a dataset with the same format as "data.txt" in a new directory
-(e.g., dataset/yourdata/original), you can train our GNN using your dataset by the above two commands (1) and (2).
+If you prepare a dataset with the same format (any molecular property can be used!), you can learn a GNN model with your dataset.
 
 
 ## How to cite
