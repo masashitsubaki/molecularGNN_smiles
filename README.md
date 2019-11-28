@@ -67,65 +67,26 @@ This GNN allows us to learn the representations of molecular fingerprints.
 
 ## Usage
 
-We provide two major scripts:
+We provide two major scripts in the main directory as follows.
 
-- code/regression or classification/preprocess_data.py creates
-the input tensor data of molecules for processing with PyTorch
-from the original data (see dataset/regression or classification/original/data.txt).
+- "preprocessing.py" creates tensor data from original text data (see dataset/QM9/data.txt).
+- "train.py" trains a GNN model using the preprocessed data to predict a molecular property.
 
-- code/regression or classification/run_training.py trains our GNN
-using the above preprocessed data to predict a molecular property.
+You can easy to train a GNN model by the following command.
 
-### (1) Preprocess data
-
-Create the tensor data of molecules and their properties with the following command:
 ```
-cd code/regression (or cd code/classification)
-bash preprocess_data.sh
+cd main
+bash train.sh
 ```
-The preprocessed data are saved in the dataset/input directory.
 
-<div align="center">
-<img src="figures/preprocess_data1.jpeg" width="700">
-<img src="figures/preprocess_data2.jpeg" width="700">
-</div>
-
-### (2) Run training
-
-Using the preprocessed data, train our GNN with the following command:
-```
-bash run_training.sh
-```
-The training and test results and the GNN model are saved in the output directory
-(after training, see output/result and output/model).
-
-You can change the hyperparameters in
-preprocess_data.sh and run_training.sh as described in the above figures.
-Try to learn various models!
-
-<div align="center">
-<img src="figures/run_training1.jpeg" width="700">
-<img src="figures/run_training2.jpeg" width="700">
-</div>
-
-
-## Result
-
-On the photovoltaic efficiency dataset in the directory of dataset/regression,
-the learning curve (x-axis is epoch and y-axis is error) is as follows:
-
-<div align="center">
-<p><img src="figures/learningcurve_photovoltaic.jpeg" width="400" /></p>
-</div>
-
-This result can be reproduce by the above two commands (1) and (2).
+You can also change the model hyperparameters described in train.sh (e.g., the dimensionality, number of hidden layers, and batch size).
 
 
 ## Training of our GNN using your molecular property dataset
 
 In this repository, we provide two datasets of
-regression (see dataset/regression/photovoltaic/original/data.txt) and
-classification (see dataset/classification/HIV/original/data.txt) as follows:
+regression (see dataset/regression/photovoltaic/data.txt) and
+classification (see dataset/classification/HIV/data.txt) as follows:
 
 <div align="center">
 <p><img src="figures/data_regression.jpeg" width="600" /></p>
@@ -136,14 +97,7 @@ classification (see dataset/classification/HIV/original/data.txt) as follows:
 </div>
 
 If you prepare a dataset with the same format as "data.txt" in a new directory
-(e.g., dataset/yourdata/original),
-you can train our GNN using your dataset by the above two commands (1) and (2).
-
-
-## Future work
-
-- Preprocess data contains "." in the SMILES format (i.e., a molecule contains multi-graphs).
-- Provide some pre-trained models and the demo scripts.
+(e.g., dataset/yourdata/original), you can train our GNN using your dataset by the above two commands (1) and (2).
 
 
 ## How to cite
