@@ -1,4 +1,4 @@
-# Graph neural network (GNN) for molecules
+# Graph neural network (GNN) for molecular property prediction (SMILES format)
 
 This is the code of a graph neural network (GNN) for molecules,
 which is based on learning representations of r-radius subgraphs (or fingerprints) in molecules.
