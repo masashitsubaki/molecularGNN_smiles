@@ -106,7 +106,6 @@ def create_datasets(task, dataset, radius, device):
         """Exclude the data contains '.' in its smiles."""
         data_original = [data for data in data_original
                          if '.' not in data.split()[0]]
-        data_original = data_original[:3000]
 
         dataset = []
 
