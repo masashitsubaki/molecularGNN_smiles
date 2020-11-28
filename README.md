@@ -1,5 +1,9 @@
 # Graph neural network (GNN) for molecular property prediction (SMILES format)
 
+
+### _**Important: this repository will not be further developed and maintained because we have shown and believe that graph neural networks or graph convolutional networks is incorrect and useless for modeling molecules in [our paper in NeurIPS 2020](https://proceedings.neurips.cc/paper/2020/hash/1534b76d325a8f591b52d302e7181331-Abstract.html). Please consider switching to our new and simple machine learning model called [quantum deep field](https://github.com/masashitsubaki/QuantumDeepField_molecule).**_
+
+
 This is the code of a graph neural network (GNN) for molecules,
 which is based on learning representations of r-radius subgraphs (or fingerprints) in molecules.
 This GNN is proposed in our paper "[Compound-protein Interaction Prediction with End-to-end Learning of Neural Networks for Graphs and Sequences (Bioinformatics, 2018)](https://academic.oup.com/bioinformatics/advance-article-abstract/doi/10.1093/bioinformatics/bty535/5050020?redirectedFrom=PDF),"
