@@ -1,7 +1,7 @@
 # Graph neural network (GNN) for molecular property prediction (SMILES format)
 
 
-### _**Important: this repository will not be further developed and maintained because we have shown and believe that graph neural networks or graph convolutional networks is incorrect and useless for modeling molecules in [our paper in NeurIPS 2020](https://proceedings.neurips.cc/paper/2020/hash/1534b76d325a8f591b52d302e7181331-Abstract.html). Please consider switching to our new and simple machine learning model called [quantum deep field](https://github.com/masashitsubaki/QuantumDeepField_molecule).**_
+### _**Important: this repository will not be further developed and maintained because we have shown and believe that graph neural networks or graph convolutional networks is incorrect and useless for modeling molecules (see our paper in [NeurIPS 2020](https://proceedings.neurips.cc/paper/2020/hash/1534b76d325a8f591b52d302e7181331-Abstract.html)). Please consider switching to our new and simple machine learning model called [quantum deep field](https://github.com/masashitsubaki/QuantumDeepField_molecule).**_
 
 
 This is the code of a graph neural network (GNN) for molecules,
